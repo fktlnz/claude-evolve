@@ -34,3 +34,8 @@ Explain the loop in one or two lines so the user knows what to expect:
 corrections, build failures and fixes are captured as they happen → consolidated on each
 turn-end → recurring lessons auto-become skills under `.claude/skills/` → injected into
 the next session. Nothing else for them to do.
+
+Also mention `/claude-evolve:grill <plan>` — a requirements interview to run BEFORE
+building something non-trivial. It stress-tests the plan, then on alignment offers to
+turn the settled decisions into `@background:`/`@fact:` lines, which land in
+`PROJECT_CONTEXT.md` automatically via the capture loop above.

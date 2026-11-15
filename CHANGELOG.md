@@ -2,6 +2,20 @@
 
 ## Unreleased — Hermes extensions (fktlnz fork)
 
+### Added: `/claude-evolve:grill` — grill-me requirements interview
+- Ports the Hermes Agent `grill-me` skill as a Claude Code slash command: models a plan
+  as a design tree, interviews the user in "frontier rounds" (every answerable question
+  asked at once, each with a recommendation), never writes code during the interview.
+- Checks `.claude/evolve/PROJECT_CONTEXT.md`/`LEARNINGS.md` first so prior decisions and
+  lessons aren't re-asked.
+- On alignment, offers to draft `@background:`/`@fact:` lines for the settled decisions —
+  bridges requirements-gathering directly into the new fact-memory channel below, instead
+  of the decisions evaporating at the end of the conversation.
+- Verified end-to-end: command loads via plugin, frontier-round format holds up in a real
+  session, and the "propose fact lines on alignment" step behaves correctly (including
+  declining gracefully when there's no session to summarize — each `claude -p` call is an
+  independent session; this is expected in interactive use within one conversation).
+
 ### Added: "fact" channel — durable project/user memory
 - **New signal type `fact`**: explicit-marker capture (`@remember:`, `@note:`,
   `@background:`, `@fact:`, and Japanese `覚えておいて:` / `メモ:` / `背景:`) via
