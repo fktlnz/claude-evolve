@@ -2,6 +2,21 @@
 
 ## Unreleased — Hermes extensions (fktlnz fork)
 
+### Added: `/claude-evolve:build-skill` — deliberate structured-skill authoring
+- Ports the Hermes Agent skill-authoring conventions as a Claude Code slash command:
+  produces a full `SKILL.md` (frontmatter, `When to Use`, `Prerequisites`, numbered
+  `Procedure` with a checkable completion criterion per step, `Pitfalls`, `Verification`)
+  — not the one-line `evolve-*` auto-promoted skills `consolidate.py` already writes.
+- Explicitly distinct from auto-promotion: only runs on user request or explicit proposal
+  + confirmation, never silently. Searches `.claude/skills/` first to extend instead of
+  duplicating, and pulls concrete `fix`/`correction`/`build_failure` entries out of
+  `.claude/evolve/learnings.json` into the `Pitfalls` section instead of inventing generic
+  advice.
+- Verified end-to-end in a live interactive session (tmux): confirmed the trigger
+  description via an `AskUserQuestion` prompt, generated a `.claude/skills/npm-build-fix/
+  SKILL.md` that correctly folded in a seeded `learnings.json` fix (seen 3x) as the first
+  Pitfall, with every Procedure step carrying a checkable "Done when" criterion.
+
 ### Added: `/claude-evolve:grill` — grill-me requirements interview
 - Ports the Hermes Agent `grill-me` skill as a Claude Code slash command: models a plan
   as a design tree, interviews the user in "frontier rounds" (every answerable question
