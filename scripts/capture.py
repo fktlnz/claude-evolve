@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 """capture.py — unified signal capture hook for claude-evolve.
 
-One script, three modes (chosen by argv[1]) so hooks stay simple:
+One script, four modes (chosen by argv[1]) so hooks stay simple:
   correction   <- UserPromptSubmit   (user pushes back -> learn the mistake)
   failure      <- PostToolUseFailure  (Bash build/test fails -> learn the error)
   success      <- PostToolUse Bash    (success soon after a failure -> learn the fix)
+  fact         <- UserPromptSubmit   (explicit @remember/@note marker -> record context)
 
 Reads the hook JSON payload from stdin. Writes signals to .claude/evolve/signals.jsonl.
 Never blocks the turn: any error exits 0 silently.
+
+Design note on `fact`: unlike corrections (detected by heuristic phrase matching, which
+tolerates false positives because worst case is a spurious learning record), facts are
+project/user background the agent should treat as durable truth — Hermes only writes
+memory from explicit user intent, never from guesses. So `fact` capture requires an
+EXPLICIT marker line (@remember/@note/@background/@fact, or JA 覚えておいて/メモ/背景)
+rather than a vibe-based heuristic. No marker, no fact — avoids polluting project memory
+with incidental chatter.
 """
 import json
 import re
@@ -29,6 +38,14 @@ CORRECTION_RE = re.compile(
     r"sai rồi|sai rồi|không phải|không đúng|không đúng|làm lại|"
     r"làm lại|sửa lại|sửa lại|bỏ cái|đừng làm|đừng",
     re.I,
+)
+# Explicit-marker only (see module docstring): a fact is recorded ONLY when the user
+# opens a line with one of these tokens, not inferred from free-form phrasing. Keeps
+# project-memory writes as deliberate as Hermes' context_notes tool call.
+FACT_RE = re.compile(
+    r"^\s*(?:@)?(remember|note|background|fact)\s*[:：]\s*(.+)$|"
+    r"^\s*(覚えておいて|メモ|背景)\s*[:：]\s*(.+)$",
+    re.I | re.M,
 )
 
 
@@ -59,6 +76,29 @@ def mode_correction(payload: dict) -> None:
         }
     }
     print(json.dumps(out))
+
+
+def mode_fact(payload: dict) -> None:
+    """Capture explicit @remember/@note/@background/@fact lines as durable project
+    context — a separate channel from corrections/build lessons (see store.py
+    FACT_MAX_CHARS and export_md.write_context). One signal per marker line found."""
+    prompt = (payload.get("prompt") or "").strip()
+    if not prompt:
+        return
+    matches = FACT_RE.findall(prompt)
+    if not matches:
+        return
+    for groups in matches[:5]:   # cap per-turn to avoid one giant prompt flooding facts
+        text = next((g for g in groups if g and g not in
+                     ("remember", "note", "background", "fact",
+                      "覚えておいて", "メモ", "背景")), "")
+        text = text.strip()
+        if not text:
+            continue
+        store.append_signal({
+            "type": "fact", "ts": store.iso(store.now()),
+            "text": text[:500],
+        })
 
 
 def mode_failure(payload: dict) -> None:
@@ -126,6 +166,8 @@ def main() -> None:
             mode_failure(payload)
         elif mode == "success":
             mode_success(payload)
+        elif mode == "fact":
+            mode_fact(payload)
     except Exception as e:
         store.debug(f"capture[{mode}] error: {e!r}")  # never break the turn
     sys.exit(0)

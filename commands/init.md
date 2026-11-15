@@ -13,18 +13,22 @@ signal — no manual init is strictly required. If the user wants learnings comm
 the repo, tell them to add `.claude/evolve/` to git; if they want them local-only, add
 `.claude/evolve/` to `.gitignore`.
 
-**Strongly recommend** the user wire the highest-reliability channel: add this one line to
+**Strongly recommend** the user wire the highest-reliability channels: add these lines to
 the project's `CLAUDE.md`:
 
 ```
 @.claude/evolve/LEARNINGS.md
+@.claude/evolve/PROJECT_CONTEXT.md
 ```
 
-`claude-evolve` regenerates `.claude/evolve/LEARNINGS.md` on every turn with the top
-lessons. Because `CLAUDE.md` is always read with top priority, this guarantees Claude
-applies them — more reliable than auto-loaded skills (which only fire when their
-description matches the task) or SessionStart injection (which is capped). Offer to add the
-import line to their CLAUDE.md for them if it isn't there yet.
+`claude-evolve` regenerates `.claude/evolve/LEARNINGS.md` (corrections/build-failures/fixes)
+and `.claude/evolve/PROJECT_CONTEXT.md` (durable project/user background, captured via
+explicit `@remember:` / `@note:` / `@background:` / `@fact:` lines in a prompt — or the
+Japanese `覚えておいて:` / `メモ:` / `背景:`) on every turn with the top lessons/facts.
+Because `CLAUDE.md` is always read with top priority, this guarantees Claude applies
+them — more reliable than auto-loaded skills (which only fire when their description
+matches the task) or SessionStart injection (which is capped). Offer to add the import
+lines to their CLAUDE.md for them if they aren't there yet.
 
 Explain the loop in one or two lines so the user knows what to expect:
 corrections, build failures and fixes are captured as they happen → consolidated on each

@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased — Hermes extensions (fktlnz fork)
+
+### Added: "fact" channel — durable project/user memory
+- **New signal type `fact`**: explicit-marker capture (`@remember:`, `@note:`,
+  `@background:`, `@fact:`, and Japanese `覚えておいて:` / `メモ:` / `背景:`) via
+  `UserPromptSubmit`. Unlike `correction` (heuristic phrase matching, tolerant of false
+  positives), facts require an explicit marker — mirrors Hermes writing memory only from
+  deliberate intent, never a guess.
+- **`store.FACT_MAX_CHARS` budget** (`EVOLVE_MEMORY_MAX_CHARS`, default 1500): once the
+  active fact set exceeds the budget, the least-confident facts (lowest frequency x
+  recency) are archived — not deleted, just excluded from injection/export — to make
+  room. Mirrors Hermes' memory tool: consolidate/evict before growing unbounded.
+- **`.claude/evolve/PROJECT_CONTEXT.md`**: a separate CLAUDE.md-importable channel from
+  `LEARNINGS.md`. Facts are durable background to carry forward (who the user is, what
+  phase the project is in), not mistakes to avoid — kept out of the lessons file so one
+  doesn't drown out the other.
+- **`inject.py` reserves a fact slice**: facts get their own capped block in
+  `SessionStart` injection so a build-failure-heavy project never crowds out project
+  context.
+- Facts are never promoted to skills (`_promote` still only accepts `fix`/`correction`/
+  `build_failure`) — background context isn't a trigger-matched procedure.
+
 ## 0.1.0 — 2026-06-19
 
 ### Resurfacing reliability

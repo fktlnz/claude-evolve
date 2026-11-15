@@ -70,6 +70,12 @@ def _title_from(sig: dict):
                 f"User pushed back with: \"{txt[:400]}\". "
                 f"Recall the surrounding context to avoid repeating the mistake.",
                 "correction:" + store.content_key(txt))
+    if t == "fact":
+        txt = sig.get("text", "")
+        return ("fact",
+                txt[:60],
+                txt[:800],
+                "fact:" + store.content_key(txt))
     return ("note", sig.get("text", "")[:60], json.dumps(sig)[:500], "")
 
 
@@ -177,12 +183,14 @@ def main() -> None:
             if rec.get("promoted") and not was:
                 promoted_now.append(rec["skill"])
         store.curate(data)
+        store.enforce_fact_budget(data)
         store.save_learnings(data)
 
     # Regenerate the CLAUDE.md-importable digest (highest-reliability resurfacing channel).
     try:
         import export_md
         export_md.write(data)
+        export_md.write_context(data)
     except Exception as e:
         store.debug(f"export_md failed: {e!r}")
 

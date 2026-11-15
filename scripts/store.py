@@ -47,6 +47,11 @@ ARCHIVE_AFTER = float(os.environ.get("EVOLVE_ARCHIVE_DAYS", "120"))
 PROMOTE_AT = int(os.environ.get("EVOLVE_PROMOTE_AT", "2"))   # seen_count to become a SKILL
 MAX_SIGNALS = int(os.environ.get("EVOLVE_MAX_SIGNALS", "5000"))  # guard runaway files
 
+# Hermes-style hard budget for "fact" records (project/user context, not build lessons).
+# Mirrors Hermes memory: a small, always-injected store with a strict char cap — when
+# full, make room by archiving the least useful entries instead of growing unbounded.
+FACT_MAX_CHARS = int(os.environ.get("EVOLVE_MEMORY_MAX_CHARS", "1500"))
+
 # ---- io & locking ----------------------------------------------------------
 
 def ensure_store() -> Path:
@@ -276,3 +281,34 @@ def confidence(rec: dict) -> float:
     age = _age_days(rec.get("last_seen", iso(now())))
     recency = max(0.0, 1.0 - age / max(ARCHIVE_AFTER, 1))
     return int(rec.get("seen_count", 1)) * (1.0 + recency)
+
+# ---- fact (project/user context) budget enforcement ------------------------
+#
+# Hermes caps its memory store at a hard character budget and, when an add would
+# overflow it, removes/consolidates the lowest-value existing entries first rather
+# than silently truncating or refusing the new one. We mirror that here: "fact" type
+# records (explicit @remember/@note/@background captures, not build lessons) are
+# bounded by FACT_MAX_CHARS; once over budget the least confident ones are archived
+# (never deleted — they can still be read in learnings.json, just excluded from
+# injection/export) until the active set fits.
+
+def _fact_size(rec: dict) -> int:
+    return len(rec.get("title", "")) + len(rec.get("body", ""))
+
+def enforce_fact_budget(data: dict) -> bool:
+    """Archive lowest-confidence active facts until total size <= FACT_MAX_CHARS.
+    Returns True if anything was archived (caller may want to log/report it)."""
+    facts = [r for r in data.values() if r.get("type") == "fact" and r.get("state") == "active"]
+    total = sum(_fact_size(r) for r in facts)
+    if total <= FACT_MAX_CHARS:
+        return False
+    # Evict least confident first (lowest frequency x recency), keep the most useful.
+    facts.sort(key=confidence)  # ascending: weakest first
+    changed = False
+    for rec in facts:
+        if total <= FACT_MAX_CHARS:
+            break
+        rec["state"] = "archived"
+        total -= _fact_size(rec)
+        changed = True
+    return changed
