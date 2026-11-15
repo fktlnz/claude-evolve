@@ -2,6 +2,17 @@
 
 ## Unreleased — Hermes extensions (fktlnz fork)
 
+### Docs: external-communication audit (README)
+- Audited the full repo for network calls: no `urllib`/`requests`/`socket`/analytics
+  SDKs anywhere in `scripts/`; every hook is local file I/O only. The only `https://`
+  occurrences in the repo are in `README.md` (prose) and `install.sh` (the user-run
+  `git clone` install step).
+- Documented the one exception: `EVOLVE_LLM=1` makes `consolidate.py`'s `_llm_polish()`
+  call `claude -p <lesson text>` automatically from the `Stop` hook, every turn, with no
+  explicit user action that turn — sends up to ~600 chars of lesson/correction/error text
+  as a new model API call. Default is unset (off). Recommended to leave it off on
+  corporate/restricted machines. Added to the README Security section.
+
 ### Added: `/claude-evolve:build-skill` — deliberate structured-skill authoring
 - Ports the Hermes Agent skill-authoring conventions as a Claude Code slash command:
   produces a full `SKILL.md` (frontmatter, `When to Use`, `Prerequisites`, numbered
