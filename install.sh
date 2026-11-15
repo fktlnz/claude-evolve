@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# claude-evolve installer — registers the plugin's marketplace and installs it.
-# Idempotent. Works against the Gitea origin or the GitHub mirror.
+# claude-evolve installer (Hermes extensions fork) — registers the plugin's
+# marketplace and installs it. Idempotent.
 set -euo pipefail
 
-GITEA_URL="https://git.microai.club/taipm/claude-evolve"
-GITHUB_URL="https://github.com/taipm/claude-evolve"
-# Default to the GitHub mirror: anonymous git clone works everywhere. The Gitea
-# origin also supports anonymous clone, but its raw-file web endpoint requires login,
-# so the curl-bootstrap one-liner must come from GitHub. Override with EVOLVE_SOURCE.
-SRC="${EVOLVE_SOURCE:-$GITHUB_URL}"
+FORK_URL="https://github.com/fktlnz/claude-evolve"
+UPSTREAM_URL="https://github.com/taipm/claude-evolve"
+# Default to this fork (Hermes extensions: fact memory, /grill, /build-skill).
+# Override with EVOLVE_SOURCE to install the upstream original instead.
+SRC="${EVOLVE_SOURCE:-$FORK_URL}"
 
-echo "claude-evolve installer"
+echo "claude-evolve installer (Hermes extensions fork)"
 echo "  source: $SRC"
 
 if ! command -v claude >/dev/null 2>&1; then
@@ -33,4 +32,6 @@ claude plugin install claude-evolve@claude-evolve
 echo
 echo "Installed. Restart Claude Code (or run /reload-skills)."
 echo "Check it:  /claude-evolve:status"
-echo "Mirror:    $GITHUB_URL"
+echo "Try also:  /claude-evolve:grill <plan>  and  /claude-evolve:build-skill <name>"
+echo "Fork:      $FORK_URL"
+echo "Upstream:  $UPSTREAM_URL"

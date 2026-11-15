@@ -1,17 +1,17 @@
 {
   "name": "claude-evolve",
   "owner": {
-    "name": "taipm",
-    "url": "https://git.microai.club/taipm"
+    "name": "taipm (original), fktlnz (Hermes extensions fork)",
+    "url": "https://github.com/fktlnz/claude-evolve"
   },
   "metadata": {
-    "description": "Self-improving skill loop for Claude Code",
-    "version": "0.1.0"
+    "description": "Self-improving skill loop for Claude Code, with Hermes-style fact memory, grill-me requirements interview, and structured-skill authoring",
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "claude-evolve",
-      "description": "Captures corrections/build-failures/fixes, refines them in place, auto-promotes recurring lessons into auto-loading skills, and injects prior-session learnings into new sessions.",
+      "description": "Captures corrections/build-failures/fixes/facts, refines them in place, auto-promotes recurring lessons into auto-loading skills, and injects prior-session learnings and project facts into new sessions.",
       "source": "./",
       "strict": false
     }

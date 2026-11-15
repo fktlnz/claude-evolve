@@ -1,13 +1,13 @@
 {
   "name": "claude-evolve",
-  "version": "0.1.0",
-  "description": "Self-improving skill loop for Claude Code — captures corrections, build failures and fixes, refines them in place, auto-promotes recurring lessons into auto-loading skills, and injects them into future sessions. Ports the Hermes Agent learning loop.",
+  "version": "0.2.0",
+  "description": "Self-improving skill loop for Claude Code — captures corrections, build failures, fixes, and explicit project facts; refines them in place, auto-promotes recurring lessons into auto-loading skills, and injects them into future sessions. Ports the Hermes Agent learning loop, plus (this fork) Hermes-style fact memory, a grill-me requirements interview, and deliberate structured-skill authoring.",
   "author": {
-    "name": "taipm",
+    "name": "taipm (original), fktlnz (Hermes extensions fork)",
     "url": "https://git.microai.club/taipm"
   },
-  "homepage": "https://git.microai.club/taipm/claude-evolve",
-  "repository": "https://git.microai.club/taipm/claude-evolve.git",
+  "homepage": "https://github.com/fktlnz/claude-evolve",
+  "repository": "https://github.com/fktlnz/claude-evolve.git",
   "license": "MIT",
   "keywords": [
     "self-improvement",
@@ -15,6 +15,8 @@
     "skills",
     "feedback-loop",
     "memory",
-    "auto-skill"
+    "auto-skill",
+    "hermes-agent",
+    "requirements-interview"
   ]
 }
